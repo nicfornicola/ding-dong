@@ -1,0 +1,59 @@
+set up gitlab
+
+
+global game:
+    ✅ build hp
+    ✅ make hud for hp
+    ✅ make hud array at the top with what badGuys are coming, they are clickable
+    clickable buttons:
+        ✅ make hud for buy ables
+        make buttons with info about its entity
+        ✅ put entity when mouse click -> add it to the good guy pool
+    action mode
+    clickable entities:
+        ✅ output on screen
+        ✅ output next to the entity
+        when multiple entites click put a ui to select which one you mean
+    money
+    hover over stat to see where bonus's come from
+    if sats are off screen, draw them on screen somehow
+
+goodGuy:
+    sprite
+    ✅ range
+    ✅different types of targeting methods created:
+        ✅ fix: goodGuys need to reset when something exits OR enters their range depending on their targeting method
+    UI buttons for switching targetingmethod
+    cost for each ability
+    abilities:
+        that slows badGuys for a few seconds
+        tesla coil - hits aoe
+        extra damage
+    add getting money back when sold
+    animation to move guy back to wallet when sold
+
+badGuy:
+    sprites
+    ✅ when reach the end of the map decrement global hp
+    ✅ spawn timer so they dont come out at the same time
+    move cooldown
+    ability cooldown
+    abilities:
+        that heals itself overTime
+        heals others
+        speeds others (around it or maybe target)
+        minus damage
+    add number of bad Guys next to circles
+
+items:
+    sprites
+    implement something??
+    items UI, what possible items can be dropped and their percents, similar to tf2 crates
+
+bugs:
+    ✅ badguys ids are duping
+    ✅ spawn time still goes even if not in play mode, make a world variable that starts counting when his play and use that instead
+    action timer still goes even when game is paused, resulting in slow shooting towers to reload during the pause
+    ✅ fix off centered drawing
+    ✅ badGuys restarting path too early?
+    ✅ cooldown is getting called even tower doesnt fire, resets when calling canDoAction, not on action
