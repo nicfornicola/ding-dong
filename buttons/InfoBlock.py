@@ -1,13 +1,7 @@
 import pygame
 from pygame.locals import *
 
-class StatBlock:
-    def __init__(self, block, sellBlock):
-        self.block = block
+class InfoBlock:
+    def __init__(self, statBlock, sellBlock):
+        self.statBlock = statBlock
         self.sellBlock = sellBlock
-
-
-
-
-
-

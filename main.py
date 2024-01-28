@@ -2,6 +2,7 @@ import random
 import sys
 
 from buttons.Button import Button
+from buttons.InfoBlock import InfoBlock
 from spawning.Pool import Pool
 from models.BadGuy import BadGuy
 from models.GoodGuy import GoodGuy
@@ -9,7 +10,7 @@ from models.GoodGuy import GoodGuy
 import pygame
 from pygame.locals import *
 
-from util.Util import findNewPos, handleClick
+from util.Util import findNewPos, handleClick, inWindow
 from world.World import World
 from buttons.Block import Block
 from buttons.BuyButton import BuyButton
@@ -21,17 +22,17 @@ BLUEISH = [0,102,102] # RGB Color green
 HEIGHT = 720
 WIDTH = 1280
 pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 running = True
 bg = pygame.image.load("util/path.png")
+
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 screen.blit(bg, (0, 0))
 
 
 def buildPath(pixels) -> list[Rect] :
     # getting length of list
-    # height = len(pixels[0])
     length = len(pixels)
 
     path = []
@@ -73,8 +74,7 @@ def drawGoodGuys(pool: Pool):
         # Draws solid line to show goodGuys currentTarget
         # if goodGuy.currentTarget:
         #     pygame.draw.line(screen, "red", (goodGuy.rect.centerx, goodGuy.rect.centery), (goodGuy.currentTarget.rect.centerx, goodGuy.currentTarget.rect.centery), 1)
-
-        pygame.draw.rect(screen, goodGuy.color, Rect(goodGuy.rect.x, goodGuy.rect.y, goodGuy.rect.width, goodGuy.rect.height))
+        pygame.draw.rect(screen, goodGuy.color, goodGuy.rect)
         pygame.draw.circle(screen, "black", (goodGuy.rect.centerx, goodGuy.rect.centery), goodGuy.rangeRad, width=1)
 
 def updateInRangeList(goodGuy, badGuyList):
@@ -87,12 +87,12 @@ def updateInRangeList(goodGuy, badGuyList):
         elif badGuy not in goodGuy.inRangeList and inRange and badGuy.isAlive:
             goodGuy.inRangeList.append(badGuy)
 
-def actionGoodGuys(pool: Pool):
-    for g in pool.goodGuyList:
+def actionGoodGuys():
+    for g in world.pool.goodGuyList:
         if g.canDoAction():
-            updateInRangeList(g, pool.badGuyList)
-            g.findTarget(pool)
-            if g.shootTarget(pool):
+            updateInRangeList(g, world.pool.badGuyList)
+            g.findTarget(world.pool)
+            if g.shootTarget(world):
                 pygame.draw.line(screen, g.color, (g.rect.centerx, g.rect.centery), (g.currentTarget.rect.centerx, g.currentTarget.rect.centery), g.damage)
 
 def drawBadGuys(pool: Pool):
@@ -129,108 +129,123 @@ def actionBadGuys(pool: Pool, path: list[Rect]):
                 elif badGuy not in goodGuy.inRangeList and inRange:
                     goodGuy.inRangeList.append(badGuy)
 
-def getSelectedStats(guy):
-    if guy is None:
-        return []
-    else:
-        stats = [guy.getEntityId(),
-                 guy.getEntityType(),
-                 guy.getRect(),
-                 # guy.getFullRect(),
-                 guy.getCoolDown()]
 
-        if guy.entityType == "good":
-            stats.extend([guy.getDamage(),
-                          guy.getItems(),
-                          guy.getCurrentTarget(),
-                          guy.getTargetingMethod(),
-                          guy.getInRangeList()])
 
-        elif guy.entityType == "bad":
-            stats.extend([guy.getCurrentIndex(),
-                          guy.getHp(),
-                          guy.getIsAlive(),
-                          guy.getSpawnTime()
-                          ])
+def findSelectedGuyStatsPosition(guy, maxWidth):
+    # Default values for when the stat block is inWindow
+    startStraight = pygame.Vector2(guy.rect.center)
+    endStraight = pygame.Vector2(startStraight.x + guy.rect.w / 1.5, startStraight.y)
+    endDiag = pygame.Vector2(endStraight.x + 5, endStraight.y + 5)
+    # Need these values to find the max height
+    textPaddingX = 5
+    textPaddingY = 2
+    textBlockPaddingHeight = 5
+    # Max height will be constant for a list of N size
+    maxHeight = (font.get_height() + textPaddingY*2 + textBlockPaddingHeight) * len(guy.getSelectedStats()) + textBlockPaddingHeight
+    rightInWindow = False
+    botInWindow = False
 
-    return stats
+    if inWindow(endDiag.x + maxWidth + textPaddingX * 4, endDiag.y):
+        rightInWindow = True
+    if inWindow(endDiag.x, endDiag.y + maxHeight):
+        botInWindow = True
+
+    blockStart = pygame.Vector2(0, endDiag.y)
+    diagonal = pygame.Vector2(endDiag.x, endDiag.y)
+
+    if rightInWindow and botInWindow:  # In the window
+        blockStart.x = endDiag.x
+    elif not botInWindow and not rightInWindow:  # Both not in window
+        endStraight.x = startStraight.x - guy.rect.w / 1.5
+        diagonal.xy = (endStraight.x - 5, endStraight.y - 5)
+        blockStart.xy = (diagonal.x - maxWidth - textPaddingX * 4, diagonal.y - maxHeight)
+    elif not rightInWindow:
+        endStraight.x = startStraight.x - guy.rect.w / 1.5
+        diagonal.xy = (endStraight.x - 5, endStraight.y + 5)
+        blockStart.x = diagonal.x - maxWidth - textPaddingX * 4 + 1
+    elif not botInWindow:
+        diagonal.xy = (endStraight.x + 5, endStraight.y - 5)
+        blockStart.xy = diagonal.x + 1,  diagonal.y - maxHeight
+
+    return startStraight, endStraight, diagonal, blockStart
 
 # Draw the line with the statBlock
-def drawSelectedGuyStats(guy,stats):
-    # If -1 then follow cursor since they are being bought
-    if guy.entityId == -1:
-        # guy.rect = Rect(pygame.mouse.get_pos(), (15, 15))
-        guy.rect = Rect(0, 0, 15, 15)
-        posX, posY = pygame.mouse.get_pos()
-        guy.rect.centerx = posX
-        guy.rect.centery = posY
-        pygame.draw.circle(screen, "black", (guy.rect.centerx, guy.rect.centery), guy.rangeRad, width=1)
+def drawSelectedGuyStats(guy):
+    maxWidth = 0
+    # Find maxWidth to check if inside the window
+    for stat in guy.getSelectedStats():
+        statWidth = (font.render(stat, True, "black")).get_rect().width
 
+        # Find the largest element in the stats
+        if maxWidth < statWidth:
+            maxWidth = statWidth
 
-    startStraight =  pygame.Vector2(guy.rect.centerx, guy.rect.centery)
-    endStraight = pygame.Vector2(startStraight.x + guy.rect.w/1.5, startStraight.y)
-    endDiag = pygame.Vector2(endStraight.x + 5, endStraight.y + 5)
+    # Do alot of math to find where the stat block will be and move the coords if necessary
+    startStraight, endStraight, endDiagonal, blockStart = findSelectedGuyStatsPosition(guy, maxWidth)
 
+    guy.infoBlock = InfoBlock(drawBlock(blockStart, guy.getSelectedStats(), maxWidth=maxWidth), None)
     pygame.draw.line(screen, "black", startStraight, endStraight, 1)
-    pygame.draw.line(screen, "black", endStraight, endDiag, 1)
-    world.selectedGuyStatBlock = drawBlock(endDiag.x, endDiag.y, stats)
+    pygame.draw.line(screen, "black", endStraight, endDiagonal, 1)
 
     if guy.entityType == "good" and guy.entityId != -1:
-        world.selectedGuySellBlock = drawBlock(world.selectedGuyStatBlock.rect.centerx - (world.selectedGuyStatBlock.rect.centerx - world.selectedGuyStatBlock.rect.x) / 3, world.selectedGuyStatBlock.rect.y + world.selectedGuyStatBlock.rect.h, ["SELL"], True)
+        rect = guy.infoBlock.statBlock.rect
+        x = rect.centerx - (rect.centerx - rect.x) / 3
+        y = rect.y + rect.h
+        guy.setSellBlock(drawBlock((x, y), ["SELL"], urgent=True))
 
-def drawBlock(x, y, stats, urgent=None):
-    if stats:
-        block = Block(Rect(x, y, 0, 0), [])
+# Set maxWidth to 0
+def drawBlock(blockStart, stats, maxWidth=0, textPaddingX=5, textPaddingY=2, textBlockPaddingHeight=5, textBlockPaddingWidth=5, urgent=None):
+    findMaxWidth = False
+    if maxWidth == 0:
+        findMaxWidth = True
 
-        textPaddingX = 5
-        textPaddingY = 2
-        textBlockPaddingHeight = 5
-        textBlockPaddingWidth = 5
-        color = "red" if urgent else "black"
-        for stat in stats:
-            # Gets statText render and rect
-            if "Targeting Method" in stat:
-                stat = stat + " >>"
-            statText = font.render(stat, True, color)
-            statTextRect = statText.get_rect()
+    block = Block(Rect(blockStart, (maxWidth, 0)), [])
+    color = "red" if urgent else "black"
 
-            # Find the largest element in the stats
-            if block.maxWidth < statTextRect.width:
-                block.maxWidth = statTextRect.width
+    for stat in stats:
+        # Gets statText render and rect
+        statText = font.render(stat, True, color)
+        statTextRect = statText.get_rect()
 
-            # Set the x, y of the textBox start from the outer block
-            statTextRect.x = block.rect.x + textBlockPaddingWidth
-            statTextRect.y = block.currentPaddingHeight + textBlockPaddingHeight
+        # Find the largest element in the stats
+        if findMaxWidth and block.maxWidth < statTextRect.width:
+            block.maxWidth = statTextRect.width
 
-            # Add together the height of the text, textPadding and textBlockPadding to get the y to start the next block
-            block.currentPaddingHeight += statTextRect.height + textPaddingY*2 + textBlockPaddingHeight
+        # Set the x, y of the textBox start from the outer block
+        statTextRect.x = block.rect.x + textBlockPaddingWidth
+        statTextRect.y = block.currentPaddingHeight + textBlockPaddingHeight
 
-            statTextRect.width += textPaddingX * 2
-            statTextRect.height += textPaddingY * 2
-            # Add to rectList the textRectBlock position and set the width and height to include the textPadding
-            pygame.draw.rect(screen, color, statTextRect, width=1)
-            block.rectList.append((stat, statTextRect))
+        # Add together the height of the text, textPadding and textBlockPadding to get the y to start the next block
+        block.currentPaddingHeight += font.get_height() + textPaddingY*2 + textBlockPaddingHeight
 
-            # Set the text x,y forward a padding amount, so it is centered within the textBlock
-            statTextRect.x += textPaddingX
-            statTextRect.y += textPaddingY
+        statTextRect.width += textPaddingX * 2
+        statTextRect.height += textPaddingY * 2
+        # Add to rectList the textRectBlock position and set the width and height to include the textPadding
+        pygame.draw.rect(screen, color, statTextRect, width=1)
+        block.rectList.append((stat, statTextRect))
 
-            # Blit the text
-            screen.blit(statText, statTextRect)
+        # Set the text x,y forward a padding amount, so it is centered within the textBlock
+        statTextRect.x += textPaddingX
+        statTextRect.y += textPaddingY
 
-        # Set the outer boxes to the largest text width + the  width
+        # Blit the text
+        screen.blit(statText, statTextRect)
+
+    # Set the outer boxes to the largest text width + the  width
+    if findMaxWidth:
         block.rect.width = block.maxWidth + textPaddingX*2 + textBlockPaddingWidth*2
-        # Set the outer boxes height to the currentPaddingHeight but - blockY since this is the height not the Y value
-        # and + textBlockPaddingHeight since it gets left out during the loop
-        block.rect.height = block.currentPaddingHeight - block.rect.y + textBlockPaddingHeight
-        # Draw the outer block
-        pygame.draw.rect(screen, "black", block.rect, width=1)
-        return block
+    else:
+        block.rect.width += textPaddingX*2 + textBlockPaddingWidth*2
+    # Set the outer boxes height to the currentPaddingHeight but - blockY since this is the height not the Y value
+    # and + textBlockPaddingHeight since it gets left out during the loop
+    block.rect.height = block.currentPaddingHeight - block.rect.y + textBlockPaddingHeight
+    # Draw the outer block
+    pygame.draw.rect(screen, "black", block.rect, width=1)
+    return block
 
-def drawImg(button):
+def drawButton(button):
     screen.blit(button.img, (button.rect.x, button.rect.y))
     pygame.draw.rect(screen, "black", button.rect, width=1)
-
 
 def getPlayButtonRect(playButtonWidth):
     block = world.hud
@@ -243,7 +258,7 @@ def getPlayButtonRect(playButtonWidth):
                           block.rect.h - blockPaddingHeight*2)
 
     # Put it in the worldList as a BuyButton to call later and set its image
-    return Button(0, "play", None, Rect(playButtonRect.x, playButtonRect.y, playButtonRect.w, playButtonRect.h))
+    return Button("play", None, Rect(playButtonRect.x, playButtonRect.y, playButtonRect.w, playButtonRect.h))
 
 def setPlayButtonImg(playButtonRect):
     # Scale the img for the first load only
@@ -255,14 +270,26 @@ def setPlayButtonImg(playButtonRect):
     # Put it in the worldList as a BuyButton to call later and set its image
     return img
 
+def getDeselectButtonRect():
+    return Button("deselect", world.deselectImg, Rect(world.hud.rect.x + 5,
+                                                      world.hud.rect.y - 30,
+                                                      world.deselectImg.get_width(),
+                                                      world.deselectImg.get_height()))
+
 def drawBuyBlocks():
     playButtonWidth = 70
 
     # Only set up once
     if len(world.hud.rectList) == 0:
         block = world.hud
-        imgList = [pygame.image.load("img/blueTower.png").convert(), pygame.image.load("img/greenTower.png").convert(), pygame.image.load("img/purpleTower.png").convert()]
-        colorList = ["blue", "green", "purple"]
+        block.currentPaddingWidth = 0
+
+        guyCosts = [5,10,15]
+        imgList = [pygame.image.load("img/blueTower.png").convert(),
+                   pygame.image.load("img/greenTower.png").convert(),
+                   pygame.image.load("img/purpleTower.png").convert(),
+                   pygame.image.load("img/greyedOutTower.png").convert()]
+        typeList = ["blue", "green", "purple"]
         # Num of blocks inside hud
         num = 3
         # Padding on the bottom and sides of the blocks
@@ -278,31 +305,52 @@ def drawBuyBlocks():
             # Add together the width of the padding and blockPadding to get the x to start the next block
             block.currentPaddingWidth += buttonRect.width + statBlockPaddingWidth*2
 
-            # Scale the img for the first load only
-            img = pygame.transform.scale(imgList[i], (buttonRect.w, buttonRect.h))
+            if world.bones < guyCosts[i]:
+                img = imgList[-1]
+            else:
+                img = imgList[i]
+
+            scaledImg = pygame.transform.scale(img, (buttonRect.w, buttonRect.h))
+
             # Put it in the worldList as a BuyButton to call later and set its image
-            block.rectList.append(BuyButton(0, "buy", colorList[i], img, Rect(buttonRect.x,
-                                                                       buttonRect.y,
-                                                                       buttonRect.width,
-                                                                       buttonRect.height)))
+            block.rectList.append(BuyButton("buy", typeList[i], scaledImg, Rect(buttonRect.x,
+                                                                               buttonRect.y,
+                                                                               buttonRect.width,
+                                                                               buttonRect.height)))
         # Set the playButtonRect just once
         world.hud.rectList.append(getPlayButtonRect(playButtonWidth))
 
-    # Set the playButton img every draw since it can change
-    world.hud.rectList[-1].img = setPlayButtonImg(world.hud.rectList[-1].rect)
+    # Set the playButton img and deselectButton every draw since it can change
+    world.hud.rectList[3].img = setPlayButtonImg(world.hud.rectList[3].rect)
+
+    if world.isMoreThenOneSelected():
+        world.hud.rectList.append(getDeselectButtonRect())
+
     # Draw outer block
     pygame.draw.rect(screen, "tan", world.hud.rect, width=0)
 
-
     # Draw inner blocks
-    for i in range(len(world.hud.rectList)):
-        # Send the buyButton to be drawn
-        drawImg(world.hud.rectList[i])
+    for button in world.hud.rectList:
+        if not world.isMoreThenOneSelected() and button.buttonFunction == "deselect":
+            world.hud.rectList.remove(button)
+            continue
+        # Send the button to be drawn
+        drawButton(button)
 
-def drawSelectedGuy(guy, stats):
-    if guy.entityId == -1:
-        drawSelectedBuyGuy(guy)
-    drawSelectedGuyStats(guy, stats)
+
+def drawSelectedBuyGuy(guy):
+    guy.rect.center = pygame.mouse.get_pos()
+    pygame.draw.rect(screen, guy.color, guy.rect)
+
+    color = "black"
+    if world.checkPlaceErrorTimeOut():
+        color = "red"
+
+
+    pygame.draw.rect(screen, color, guy.rect, width=1)
+    pygame.draw.circle(screen, color, (guy.rect.centerx, guy.rect.centery), guy.rangeRad, width=1)
+    drawSelectedGuyStats(world.selectedBuyGuy)
+
 
 def drawNextBadGuys():
     w = 100
@@ -340,7 +388,7 @@ def drawNextBadGuys():
 
         numText = numFont.render("x" + str(world.pool.numOfBadGuyTypes[i]), True, "black")
         numTextRect = numText.get_rect()
-        numTextRect.center = badGuyRect.bottomright
+        numTextRect.center = (badGuyRect.centerx + h/3, badGuyRect.centery + h/3)
 
         numRectList.append((numText, numTextRect))
 
@@ -352,20 +400,27 @@ def drawNextBadGuys():
     for i in range(len(block.rectList)):
         # Send the buyButton to be drawn
         pygame.draw.circle(screen, block.rectList[i].color, block.rectList[i].rect.center, h/3, width=0)
+        # pygame.draw.rect(screen, "red", block.rectList[i].rect)
         screen.blit(numRectList[i][0], numRectList[i][1])
 
+def drawWorldStats():
+    drawBlock((WIDTH * .01, HEIGHT * .01), ["HP: " + str(world.globalHp), "Bones: " + str(world.bones), "Played: " + str(round(world.timePlayed, 3))])
 
 
 def drawHud():
     drawBuyBlocks()
-    drawBlock(WIDTH * .01, HEIGHT * .01, [str(world.globalHp), "Played: " + str(round(world.timePlayed, 3))])
+    drawWorldStats()
     drawNextBadGuys()
 
-def drawSelectedBuyGuy(guy):
-    guy.rect.center = pygame.mouse.get_pos()
-    pygame.draw.rect(screen, guy.color, guy.rect)
-    pygame.draw.rect(screen, "black", guy.rect, width=1)
+    if world.selectedBuyGuy:
+        drawSelectedBuyGuy(world.selectedBuyGuy)
 
+    # Draw stats every loop to make sure they are updated
+    world.numSelected = 0
+    for guy in world.pool.getGuyLists():
+        if guy.isSelected:
+            world.numSelected += 1
+            drawSelectedGuyStats(guy)
 
 ########################## init #######################################
 world = World()
@@ -383,8 +438,8 @@ pathList = buildPath(pygame.surfarray.pixels2d(screen))
 
 # Set the level 1 list of badGuys
 # Spawn time is seconds, spawn difference is how fast after the last spawn
-world.pool.badGuyFactory(badGuyType=1, numOfBadGuys=3, spawnTime=.5, spawnDifference=1)
-world.pool.badGuyFactory(badGuyType=2, numOfBadGuys=2 , spawnTime=2, spawnDifference=.5)
+world.pool.badGuyFactory(badGuyType=1, numOfBadGuys=10, spawnTime=1, spawnDifference=1)
+world.pool.badGuyFactory(badGuyType=2, numOfBadGuys=1 , spawnTime=1, spawnDifference=1)
 world.pool.badGuyFactory(badGuyType=3, numOfBadGuys=10 , spawnTime=3, spawnDifference=.5)
 
 
@@ -398,20 +453,15 @@ while running:
             running = False
         # Handles mouse clicks on entities, hud and other stuff
         if event.type == pygame.MOUSEBUTTONDOWN:
-            world.selectedGuy = handleClick(world)
+            handleClick(world)
 
-    drawHud()
     drawBadGuys(world.pool)
     drawGoodGuys(world.pool)
-
-    # If there is a selectedGuy, get his stats every loop to make sure they are updated and draw them
-    if world.selectedGuy:
-        world.selectedGuyStats = getSelectedStats(world.selectedGuy)
-        drawSelectedGuy(world.selectedGuy, world.selectedGuyStats)
+    drawHud()
 
     if world.currentMode == "play":
         actionBadGuys(world.pool, pathList)
-        actionGoodGuys(world.pool)
+        actionGoodGuys()
 
 
     # change speed every 30 ticks gamble mode

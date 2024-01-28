@@ -1,6 +1,3 @@
-set up gitlab
-
-
 global game:
     ✅ build hp
     ✅ make hud for hp
@@ -8,29 +5,36 @@ global game:
     clickable buttons:
         ✅ make hud for buy ables
         make buttons with info about its entity
+        ✅ make BuyButton hold the guy it is instead of just color
         ✅ put entity when mouse click -> add it to the good guy pool
-    action mode
+        ✅ make a deselect all button
+    end level when die or when all dead
+    set level enemies
+
+    ✅ action mode
     clickable entities:
         ✅ output on screen
         ✅ output next to the entity
         when multiple entites click put a ui to select which one you mean
-    money
+    ✅ money
     hover over stat to see where bonus's come from
-    if sats are off screen, draw them on screen somehow
+    ✅ if sats are off screen, draw them on screen somehow
+    ✅ if only one selected guy then click off the selected stats to remove them
 
 goodGuy:
     sprite
     ✅ range
     ✅different types of targeting methods created:
         ✅ fix: goodGuys need to reset when something exits OR enters their range depending on their targeting method
-    UI buttons for switching targetingmethod
-    cost for each ability
+    ✅ UI buttons for switching targetingmethod
+    ✅ cost for each ability
     abilities:
         that slows badGuys for a few seconds
         tesla coil - hits aoe
         extra damage
-    add getting money back when sold
+    ✅ add getting money back when sold
     animation to move guy back to wallet when sold
+    ✅ total damage stat
 
 badGuy:
     sprites
@@ -48,9 +52,14 @@ badGuy:
 items:
     sprites
     implement something??
-    items UI, what possible items can be dropped and their percents, similar to tf2 crates
+    items UI,
+    what possible items can be dropped and their percents, similar to tf2 crates
 
 bugs:
+    ✅ guy places off the mouse wrong
+    can place goodGuys in hud
+    stats flips when go to the right on badguys
+    ✅ selectedGuyStatsBlock stays active making clicks not work
     ✅ badguys ids are duping
     ✅ spawn time still goes even if not in play mode, make a world variable that starts counting when his play and use that instead
     action timer still goes even when game is paused, resulting in slow shooting towers to reload during the pause

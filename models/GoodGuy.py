@@ -1,12 +1,15 @@
 import pygame
 
+from buttons.InfoBlock import InfoBlock
 from models.Entity import Entity
 from models.BadGuy import BadGuy
 from util.Util import isInside, dis
 
+
 class GoodGuy(Entity):
-    def __init__(self, entityId, entityType, color, rect, rangeRad, coolDown, damage=None, targetingMethod=None):
-        super().__init__(entityId, entityType, rect, coolDown)
+    def __init__(self, towerType, entityId=-1, color=None, rect=None, rangeRad=None, coolDown=None, damage=None, targetingMethod=None):
+        super().__init__(entityId, "good", rect, coolDown)
+        self.towerType = towerType
         self.color = color
         self.items = []
         self.fireRate = 0
@@ -15,14 +18,29 @@ class GoodGuy(Entity):
         self.targetingMethod = targetingMethod
         self.targetingMethods = ["First", "Last", "Strongest", "Closest"]
         self.rangeRad = rangeRad
-        self.targetingMethodChanged = False
         self.inRangeList: list[BadGuy] = []
+        self.totalDamageDone = 0
+        self.setGoodGuy()
+
+
+    def getSelectedStats(self):
+        return ([self.getTowerType()] + self.getBaseStats() + [self.getDamage(),
+                                      self.getItems(),
+                                      self.getCurrentTarget(),
+                                      self.getTargetingMethod(),
+                                      self.getInRangeList()])
 
     def getInRangeList(self):
         strList = []
         for badGuy in self.inRangeList:
             strList.append(str(badGuy.entityId))
         return "In Range: " + str(strList)
+
+    def getTowerType(self):
+        return "Tower Type: " + str(self.towerType)
+
+    def getTotalDamage(self):
+        return "Dmg Done: " + str(self.totalDamageDone)
 
     def getRangeRad(self):
         return "Range: " + str(self.rangeRad)
@@ -34,7 +52,7 @@ class GoodGuy(Entity):
         return "Fire Rate: " + str(self.fireRate)
 
     def getDamage(self):
-        return "Damage: " + str(self.damage)
+        return "Dmg: " + str(self.damage) + " (" + str(self.totalDamageDone) + ")"
 
     def getCurrentTarget(self):
         if self.currentTarget is None:
@@ -42,14 +60,38 @@ class GoodGuy(Entity):
         return "Current Target: " + str(self.currentTarget.entityId)
 
     def getTargetingMethod(self):
-        return "Targeting Method: " + str(self.targetingMethod)
+        return "Targeting Method: " + str(self.targetingMethod) + " >>"
 
     def setCurrentTarget(self, badGuy:BadGuy) -> None:
         self.currentTarget = badGuy
 
+    def setGoodGuyStats(self, color, damage, bones, rangeRad, coolDown, targetingMethod):
+        self.rect = pygame.Rect(0, 0, 15, 15)
+        self.rect.center = pygame.mouse.get_pos()
+        self.color = color
+        self.rangeRad = rangeRad
+        self.coolDown = coolDown
+        self.damage = damage
+        self.targetingMethod = targetingMethod
+        self.bones = bones
+        return self
+
+    def setGoodGuy(self):
+        if self.towerType == "green":
+            return self.setGoodGuyStats("green", damage=5, bones=2, rangeRad=150, coolDown=500, targetingMethod="First")
+        elif self.towerType == "blue":
+            return self.setGoodGuyStats("blue", damage=1, bones=5, rangeRad=80, coolDown=100, targetingMethod="First")
+        elif self.towerType == "purple":
+            return self.setGoodGuyStats("purple", damage=15, bones=8, rangeRad=300, coolDown=1000, targetingMethod="First")
+
+    def copyGoodGuy(self, entityID):
+        return GoodGuy(self.towerType, entityId=entityID)
+
     def inRange(self, badGuy):
 
         return isInside(badGuy.rect.centerx, badGuy.rect.centery, self)
+
+
 
     def findClosestTarget(self, inRangeList: list[BadGuy]) -> BadGuy | None:
         newTarget = None
@@ -76,16 +118,18 @@ class GoodGuy(Entity):
             case _:
                 print("bad targetingMethod")
 
-    def shootTarget(self, pool) -> bool:
+    def shootTarget(self, world) -> bool:
         # If we have a current target then shoot else do nothing
         if self.currentTarget:
             self.currentTarget.hp -= self.damage
+            self.totalDamageDone += self.damage
             self.currentTarget.color = [rgb - self.damage for rgb in self.currentTarget.color]
 
             if self.currentTarget.hp <= 0:
                 self.currentTarget.isAlive = False
                 self.currentTarget.color = "red"
-                pool.updateAllDead()
+                world.pool.updateAllDead()
+                world.addBones(self.currentTarget.bones)
             else:
                 for i in range(len(self.currentTarget.color)):
                     self.currentTarget.color[i] -= self.damage
@@ -97,55 +141,22 @@ class GoodGuy(Entity):
         else:
             return False
 
-    def setGoodGuyStats(self, color, rangeRad, coolDown, damage, targetingMethod, x=None, y=None ):
-        posX, posY = pygame.mouse.get_pos()
-        self.rect = pygame.Rect(posX, posY, 15, 15)
-        self.color = color
-        self.rangeRad = rangeRad
-        self.coolDown = coolDown
-        self.damage = damage
-        self.targetingMethod = targetingMethod
-        return self
-
-
-    def setGoodGuy(self):
-        if self.color == "green":
-            self.setGreen()
-        elif self.color == "blue":
-            self.setBlue()
-        elif self.color == "purple":
-            self.setPurple()
-        return self
-
-    def setBlue(self):
-        self.setGoodGuyStats("blue", 80, 100, 1, "First")
-
-    def setGreen(self):
-        self.setGoodGuyStats("green", 150, 500, 2, "First")
-
-    def setPurple(self):
-        self.setGoodGuyStats("purple", 300, 1000, 15, "First")
-
-    def copyGoodGuy(self, entityId):
-        return GoodGuy(entityId,
-                       self.entityType,
-                       self.color,
-                       self.rect,
-                       self.rangeRad,
-                       self.coolDown,
-                       self.damage,
-                       self.targetingMethod)
-
     def __str__(self) -> str:
-        return "entityType=" + str(self.entityType) +\
-                " rect=" + str(self.rect) +\
-                " coolDown=" + str(self.coolDown) +\
+        return "entityId=" + str(self.entityId) +\
+                " entityType=" + str(self.entityType) + \
+                " towerType=" + str(self.towerType) + \
                 " color=" + str(self.color) + \
+                " rect=" + str(self.rect) +\
+                " radRange=" + str(self.rangeRad) +\
+                " coolDown=" + str(self.coolDown) + \
+                " damage=" + str(self.damage) + \
+                " targetingMethod=" + str(self.targetingMethod) + \
                 " items=" + str(self.items) + \
                 " fireRate=" + str(self.fireRate) +\
-                " damage=" + str(self.damage) +\
-                " currentTarget=" + str(self.currentTarget) +\
-                " targetingMethod=" + str(self.targetingMethod)
+                " inRangeList=" + str(self.inRangeList) +\
+                " totalDamageDone=" + str(self.totalDamageDone) +\
+                " currentTarget=" + str(self.currentTarget)
+
 
 ##################### Static functions ###############################
 

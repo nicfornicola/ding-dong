@@ -5,7 +5,32 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="973e9b88-9522-4b83-a75b-ebe46a1ffe66" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/buttons/InfoBlock.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zDevLog/robberDemo.gif.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zDevLog/robberDemo2.gif.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zDevLog/robberDemo3.gif.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zDevLog/robberDemo4.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zDevLog/robberDemo5.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zDevLog/robberDemo6.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zDevLog/robberDemo7.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zDevLog/robberDemo8.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Walls.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/buttons/Block.py" beforeDir="false" afterPath="$PROJECT_DIR$/buttons/Block.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/buttons/Button.py" beforeDir="false" afterPath="$PROJECT_DIR$/buttons/Button.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/buttons/BuyButton.py" beforeDir="false" afterPath="$PROJECT_DIR$/buttons/BuyButton.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/BadGuy.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/BadGuy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/Entity.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/Entity.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/GoodGuy.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/GoodGuy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spawning/Pool.py" beforeDir="false" afterPath="$PROJECT_DIR$/spawning/Pool.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/todo.txt" beforeDir="false" afterPath="$PROJECT_DIR$/todo.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/Util.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/Util.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/world/World.py" beforeDir="false" afterPath="$PROJECT_DIR$/world/World.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,13 +61,15 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;last_opened_file_path&quot;: &quot;F:/PythonProjects/towers&quot;,
+    &quot;last_opened_file_path&quot;: &quot;F:/PythonProjects/towers/buttons&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.documentation.PythonDocumentationConfigurable&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -55,14 +82,37 @@
       <recent name="F:\PythonProjects\chase\animals" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\PythonProjects\towers\devLog" />
       <recent name="F:\PythonProjects\towers\img" />
       <recent name="F:\PythonProjects\towers\buttons" />
       <recent name="F:\PythonProjects\towers" />
       <recent name="F:\PythonProjects\towers\util" />
-      <recent name="F:\PythonProjects\chase\img" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.main">
+    <configuration name="Go" type="PythonConfigurationType" factoryName="Python">
+      <module name="chase" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Nicolas\AppData\Local\Microsoft\WindowsApps\python3.10.exe" />
+      <option name="SDK_NAME" value="Python 3.10" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="chase" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -93,6 +143,7 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="C:\Users\Nicolas\AppData\Local\Microsoft\WindowsApps\python3.10.exe" />
+      <option name="SDK_NAME" value="Python 3.10" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -107,6 +158,10 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Python.main" />
+      <item itemvalue="Python.Go" />
+    </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -176,7 +231,15 @@
       <workItem from="1706072870404" duration="6151000" />
       <workItem from="1706137264754" duration="389000" />
       <workItem from="1706139824470" duration="349000" />
-      <workItem from="1706157374107" duration="6690000" />
+      <workItem from="1706157374107" duration="7375000" />
+      <workItem from="1706165212574" duration="501000" />
+      <workItem from="1706233937209" duration="68000" />
+      <workItem from="1706237136994" duration="3479000" />
+      <workItem from="1706242824944" duration="993000" />
+      <workItem from="1706245491151" duration="7949000" />
+      <workItem from="1706302109308" duration="12179000" />
+      <workItem from="1706340728302" duration="28000" />
+      <workItem from="1706418517884" duration="12816000" />
     </task>
     <servers />
   </component>
@@ -187,7 +250,7 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/towers$main.coverage" NAME="main Coverage Results" MODIFIED="1706163379216" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/towers$main.coverage" NAME="main Coverage Results" MODIFIED="1706431433260" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/chase$main.coverage" NAME="main Coverage Results" MODIFIED="1682485479942" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

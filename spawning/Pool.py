@@ -15,6 +15,8 @@ class Pool:
         self.goodGuyNextId = 1
         self.badGuyNextId = 1
 
+    def getGuyLists(self):
+        return self.goodGuyList + self.badGuyList
 
     def badGuyFactory(self, numOfBadGuys, badGuyType, spawnTime, spawnDifference):
         self.numOfBadGuyTypes.append(numOfBadGuys)

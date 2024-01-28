@@ -16,6 +16,12 @@ class BadGuy(Entity):
         self.currentIndex = 0
         self.isAlive = True
 
+    def getSelectedStats(self):
+        return self.getBaseStats() + [self.getBadGuyType(),
+                                     self.getHp(),
+                                     self.getSpawnTime(),
+                                     self.getIsAlive()]
+
     def switchCanSpawn(self):
         self.canSpawn = not self.canSpawn
 
@@ -27,6 +33,9 @@ class BadGuy(Entity):
 
     def getCurrentIndex(self):
         return "Current Index: " + str(self.currentIndex)
+
+    def getBadGuyType(self):
+        return "Type: " + str(self.badGuyType)
 
     def getHp(self):
         return "HP: " + str(self.hp)
