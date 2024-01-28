@@ -26,7 +26,7 @@ class World:
         self.timePaused = 0
         self.bones = 30
 
-    def setPlaceError(self):
+    def setPlacingTowerError(self):
         self.selectedBuyGuyError = True
         self.errorTimer = 10
 

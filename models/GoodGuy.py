@@ -91,7 +91,10 @@ class GoodGuy(Entity):
 
         return isInside(badGuy.rect.centerx, badGuy.rect.centery, self)
 
-
+    def handleTargetingMethodChange(self):
+        index = self.targetingMethods.index(self.targetingMethod)
+        self.targetingMethod = self.targetingMethods[0] if index + 1 == len(self.targetingMethods) else \
+                               self.targetingMethods[index + 1]
 
     def findClosestTarget(self, inRangeList: list[BadGuy]) -> BadGuy | None:
         newTarget = None

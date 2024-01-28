@@ -414,12 +414,10 @@ def drawHud():
 
     if world.selectedBuyGuy:
         drawSelectedBuyGuy(world.selectedBuyGuy)
-
+    print(world.numSelected)
     # Draw stats every loop to make sure they are updated
-    world.numSelected = 0
     for guy in world.pool.getGuyLists():
         if guy.isSelected:
-            world.numSelected += 1
             drawSelectedGuyStats(guy)
 
 ########################## init #######################################
@@ -453,7 +451,7 @@ while running:
             running = False
         # Handles mouse clicks on entities, hud and other stuff
         if event.type == pygame.MOUSEBUTTONDOWN:
-            handleClick(world)
+            handleClick(world, event)
 
     drawBadGuys(world.pool)
     drawGoodGuys(world.pool)

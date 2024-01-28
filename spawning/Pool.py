@@ -15,6 +15,7 @@ class Pool:
         self.goodGuyNextId = 1
         self.badGuyNextId = 1
 
+    # Add the lists together and return
     def getGuyLists(self):
         return self.goodGuyList + self.badGuyList
 

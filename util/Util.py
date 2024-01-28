@@ -3,10 +3,8 @@ import math
 import pygame
 from pygame.rect import Rect
 
-
 HEIGHT = 720
 WIDTH = 1280
-
 
 def inWindow(x,y):
     return -1 < x < 1280 and -1 < y < 720
@@ -33,7 +31,6 @@ def findNewPos(pixels,x,y,traveled):
         newPos = Rect(x + 1, y - 1, 1, 1)
     elif inWindow(x - 1, y + 1) and pixels[x - 1][y + 1] == 0 and notSeen(x - 1, y + 1, traveled):  # left down
         newPos = Rect(x - 1, y + 1, 1, 1)
-
     return newPos
 
 # x and y are point to find if in circle
@@ -48,16 +45,6 @@ def isInside(pointX, pointY, guy):
 def dis(guy1, guy2):
     return math.dist([guy1.rect.x, guy1.rect.y], [guy2.rect.x, guy2.rect.y])
 
-def handleEntitySelect(world, pos):
-    clicked = False
-    for guy in world.pool.getGuyLists():
-        if (guy.entityType == "good" and guy.rect.collidepoint(pos)) or (guy.entityType == "bad" and isInside(pos[0], pos[1], guy)):
-            guy.isSelected = not guy.isSelected
-            clicked = True
-
-    if world.numSelected == 1 and not clicked:
-        handleDeselectButton(world.pool)
-
 def mouseInHud(hud, pos):
     return hud.rect.collidepoint(pos)
 
@@ -70,75 +57,101 @@ def mouseInHudButtons(hud, pos):
 def mouseInSell(pool, pos):
     for guy in pool.goodGuyList:
         if guy.infoBlock.sellBlock:
-            # [("SELL", Rect(x,y,w,h)]
+            #  guy.infoBlock.sellBlock.rectList is [("SELL", Rect(x,y,w,h)]
             if guy.infoBlock.sellBlock.rectList[0][1].collidepoint(pos):
                 return guy
     return None
-
-
-def handleBuyButton(world, clickedButton):
-    world.selectedBuyGuy = clickedButton.goodGuy
-
-
-def handlePlayButton(world):
-    world.switchCurrentMode()
-
-def handlePlaceGoodGuy(world, pos):
-    if mouseInHud(world.hud, pos):
-        world.setPlaceError()
-    else:
-        world.pool.addGoodGuy(world.selectedBuyGuy.copyGoodGuy(world.pool.goodGuyNextId))
-        world.pool.goodGuyNextId += 1
-        world.minusBones(world.selectedBuyGuy.bones)
-        world.selectedBuyGuy = None
 
 def mouseInSelectedStats(pool, pos):
     for goodGuy in pool.goodGuyList:
         if goodGuy.isSelected and goodGuy.infoBlock.statBlock.rect.collidepoint(pos):
             return goodGuy
 
+def handleEntitySelect(world, pos):
+    # Draw stats every loop to make sure they are updated
+
+    clicked = False
+    for guy in world.pool.getGuyLists():
+        # Use different clicks since goodGuys are squares and badGuys are circles
+        if (guy.entityType == "good" and guy.rect.collidepoint(pos))\
+           or (guy.entityType == "bad" and isInside(pos[0], pos[1], guy)):
+            clicked = True
+            guy.isSelected = not guy.isSelected
+
+            # if guy clicked isSelected increment, if guy is deselected decrement
+            if guy.isSelected:
+                world.numSelected += 1
+            else:
+                world.numSelected -= 1
+
+    return clicked
+
+def handleClickedNothing(world):
+    # If only one guy is selected allow for screen click to deselect
+    if world.numSelected == 1:
+        handleDeselectButton(world)
+
+def handleBuyButton(world, clickedButton):
+    world.selectedBuyGuy = clickedButton.goodGuy
+
+def handlePlayButton(world):
+    world.switchCurrentMode()
+
+def handlePlaceGoodGuy(world):
+    world.pool.addGoodGuy(world.selectedBuyGuy.copyGoodGuy(world.pool.goodGuyNextId))
+    world.pool.goodGuyNextId += 1
+    world.minusBones(world.selectedBuyGuy.bones)
+    world.selectedBuyGuy = None
+
+def handlePlaceGuyClick(world, event):
+    # If right click deselect the buyGuy
+    if event.button == 3:
+        world.selectedBuyGuy = None
+    # If left click
+    elif event.button == 1:
+        # if mouse in hud do some red lines around the guy
+        if mouseInHud(world.hud, event.pos):
+            world.setPlacingTowerError()
+        else: # if anywhere else place guy
+            handlePlaceGoodGuy(world)
 
 def handleStatClick(clickedGuy, pos):
+    # look through the guys infoBlock stats
+    # statTuple = [("String", Rect)]
     for statTuple in clickedGuy.infoBlock.statBlock.rectList:
-        if statTuple[1].collidepoint(pos):
-            if "Targeting Method" in statTuple[0]:
-                guy = clickedGuy
-                index = guy.targetingMethods.index(guy.targetingMethod)
-                guy.targetingMethod = guy.targetingMethods[0] if index + 1 == len(guy.targetingMethods) else guy.targetingMethods[index+1]
+        if statTuple[1].collidepoint(pos): # If clicked a stat
+            if "Targeting Method" in statTuple[0]: # if click stat String is "Targeting Method"
+                clickedGuy.handleTargetingMethodChange()
 
 def handleSell(world, soldGuy):
     world.pool.sellGoodGuy(soldGuy.entityId)
     world.addBones(soldGuy.bones)
+    world.numSelected -= 1
 
-def handleDeselectButton(pool):
-    for guy in pool.getGuyLists():
+def handleDeselectButton(world):
+    world.numSelected = 0
+    for guy in world.pool.getGuyLists():
         if guy.isSelected:
             guy.isSelected = False
 
-def handleClick(world):
-    pos = pygame.mouse.get_pos()
-
-    # If clicked hud to get selectedGuy with ID: -1 then this click will place guy in world
+def handleClick(world, event):
+    # If buying a guy then place guy in world and subtract money
     if world.selectedBuyGuy:
-        handlePlaceGoodGuy(world, pos)
-    else:  # If no selected then check where mouse click happened, if on placed entity or hud
-        # If mouse is in hud then check for clicked buttons
-        if clickedGuy := mouseInSelectedStats(world.pool, pos):
-            handleStatClick(clickedGuy, pos)
-            # newSelectedGuy = world.selectedGuy
-        elif soldGuy := mouseInSell(world.pool, pos):
+        handlePlaceGuyClick(world, event)
+    else:  # If no selected then check if mouse click on entity or hud buttons
+        if clickedGuy := mouseInSelectedStats(world.pool, event.pos):
+            handleStatClick(clickedGuy, event.pos)
+        elif soldGuy := mouseInSell(world.pool, event.pos):
             handleSell(world, soldGuy)
-        elif clickedButton := mouseInHudButtons(world.hud, pos):
-                if clickedButton.buttonFunction == "buy":
+        # If in hud buttons then see which hud button was clicked
+        elif clickedButton := mouseInHudButtons(world.hud, event.pos):
+                if clickedButton.buttonFunction == "buy": # Prepare to buy a guy
                     handleBuyButton(world, clickedButton)
                 elif clickedButton.buttonFunction == "play": # Acts as play/pause button
                     handlePlayButton(world)
-                elif clickedButton.buttonFunction == "deselect": # Acts as play/pause button
-                    handleDeselectButton(world.pool)
-        # Else check for clickedEntity
-        else:
-            handleEntitySelect(world, pos)
-
-
-
+                elif clickedButton.buttonFunction == "deselect": # Deselect all entities
+                    handleDeselectButton(world)
+        # If not in hud then for clickedEntity
+        elif not handleEntitySelect(world, event.pos):
+            handleClickedNothing(world)
 
