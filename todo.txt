@@ -57,7 +57,7 @@ items:
 
 bugs:
     ✅ guy places off the mouse wrong
-    can place goodGuys in hud
+    ✅ can place goodGuys in hud
     stats flips when go to the right on badguys
     ✅ selectedGuyStatsBlock stays active making clicks not work
     ✅ badguys ids are duping

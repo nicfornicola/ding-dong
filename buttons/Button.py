@@ -9,7 +9,7 @@ class Button:
 
     def __str__(self) -> str:
         return "buttonFunction: " + self.buttonFunction+\
-               "rect: " + str(self.rect)+\
-               "img: " + str(self.img)
+               " rect: " + str(self.rect)+\
+               " img: " + str(self.img)
 
 

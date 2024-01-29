@@ -25,6 +25,9 @@ class World:
         self.timePlayed = 0
         self.timePaused = 0
         self.bones = 30
+        self.soldGuy = None
+        self.soldGuyPath = []
+        self.soldGuyIndex = 0
 
     def setPlacingTowerError(self):
         self.selectedBuyGuyError = True

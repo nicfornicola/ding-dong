@@ -10,5 +10,5 @@ class BuyButton(Button):
         self.goodGuy = GoodGuy(towerType)
 
     def __str__(self) -> str:
-        return super.__str__(self) + str(self.goodGuy)
+        return super().__str__() + " " + str(self.goodGuy)
 

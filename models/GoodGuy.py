@@ -1,6 +1,5 @@
 import pygame
 
-from buttons.InfoBlock import InfoBlock
 from models.Entity import Entity
 from models.BadGuy import BadGuy
 from util.Util import isInside, dis
@@ -20,6 +19,7 @@ class GoodGuy(Entity):
         self.rangeRad = rangeRad
         self.inRangeList: list[BadGuy] = []
         self.totalDamageDone = 0
+        self.sellSpot = None
         self.setGoodGuy()
 
 

@@ -1,11 +1,6 @@
-import random
-import sys
-
 from buttons.Button import Button
 from buttons.InfoBlock import InfoBlock
 from spawning.Pool import Pool
-from models.BadGuy import BadGuy
-from models.GoodGuy import GoodGuy
 
 import pygame
 from pygame.locals import *
@@ -67,7 +62,6 @@ def buildPath(pixels) -> list[Rect] :
         firstLoop = False
 
     return path
-
 
 def drawGoodGuys(pool: Pool):
     for goodGuy in pool.goodGuyList:
@@ -406,15 +400,44 @@ def drawNextBadGuys():
 def drawWorldStats():
     drawBlock((WIDTH * .01, HEIGHT * .01), ["HP: " + str(world.globalHp), "Bones: " + str(world.bones), "Played: " + str(round(world.timePlayed, 3))])
 
+def drawMoneyText(rect):
+    moneyText = font.render("$", True, "black")
+    leftRect = Rect(rect.x - 8, rect.y + 3, 20 , 20)
+    midRect = rect
+    rightRect = Rect(rect.x + 8, rect.y + 5, 20, 20)
+
+    screen.blit(moneyText, leftRect)
+    screen.blit(moneyText, midRect)
+    screen.blit(moneyText, rightRect)
+
+    rect.y -= 1
+    return rect
+
+def drawSoldGuy():
+    x = world.soldGuyPath[world.soldGuyIndex].x
+    y = world.soldGuyPath[world.soldGuyIndex].y
+    world.soldGuy.rect.center = (x,y)
+    pygame.draw.rect(screen, world.soldGuy.color, world.soldGuy.rect)
+    pygame.draw.rect(screen, "red", world.soldGuy.rect, width=1)
+
+    drawMoneyText(world.soldGuy.sellSpot)
+
+    if world.soldGuyIndex+1 == len(world.soldGuyPath):
+        world.soldGuyIndex = 0
+        world.soldGuy = None
+    else:
+        world.soldGuyIndex += 1
 
 def drawHud():
     drawBuyBlocks()
     drawWorldStats()
     drawNextBadGuys()
 
+    if world.soldGuy:
+        drawSoldGuy()
+
     if world.selectedBuyGuy:
         drawSelectedBuyGuy(world.selectedBuyGuy)
-    print(world.numSelected)
     # Draw stats every loop to make sure they are updated
     for guy in world.pool.getGuyLists():
         if guy.isSelected:
