@@ -33,35 +33,6 @@ def findNewPos(pixels,x,y,traveled):
         newPos = Rect(x - 1, y + 1, 1, 1)
     return newPos
 
-# Using the Bresenham method
-def setSellPath(x0, y0, x1, y1):
-    points = []
-    dx = abs(x1 - x0)
-    dy = abs(y1 - y0)
-    sx = 1 if x0 < x1 else -1
-    sy = 1 if y0 < y1 else -1
-    err = dx - dy
-
-    i = 0
-    while True:
-        if i % 40 == 0:
-            points.append(pygame.Vector2(x0, y0))
-
-        if x0 == x1 and y0 == y1:
-            break
-
-        e2 = 2 * err
-        if e2 > -dy:
-            err -= dy
-            x0 += sx
-        if e2 < dx:
-            err += dx
-            y0 += sy
-        i += 1
-
-    return points
-
-
 # x and y are point to find if in circle
 def isInside(pointX, pointY, guy):
     # (x - center_x)² + (y - center_y)² < radius²
@@ -86,7 +57,7 @@ def mouseInHudButtons(hud, pos):
 def mouseInSell(pool, pos):
     for guy in pool.goodGuyList:
         if guy.infoBlock.sellBlock:
-            #  guy.infoBlock.sellBlock.rectList is [("SELL", Rect(x,y,w,h)]
+            # guy.infoBlock.sellBlock.rectList is [("SELL", Rect(x,y,w,h)]
             if guy.infoBlock.sellBlock.rectList[0][1].collidepoint(pos):
                 return guy
     return None
@@ -152,15 +123,13 @@ def handleStatClick(clickedGuy, pos):
             if "Targeting Method" in statTuple[0]: # if click stat String is "Targeting Method"
                 clickedGuy.handleTargetingMethodChange()
 
-def handleSell(world, soldGuy):
+def handleSell(world, soldGoodGuy):
     for button in world.hud.rectList:
-        if button.buttonFunction == "buy" and button.goodGuy.towerType == soldGuy.towerType:
-            world.soldGuy = soldGuy
-            world.soldGuy.sellSpot = Rect(soldGuy.rect.x, soldGuy.rect.y, soldGuy.rect.w, soldGuy.rect.h)
-            world.soldGuyPath = setSellPath(soldGuy.rect.centerx, soldGuy.rect.centery, button.rect.centerx, button.rect.centery)
+        if button.buttonFunction == "buy" and button.goodGuy.towerType == soldGoodGuy.towerType:
+            world.setSoldGuy(soldGoodGuy, button.rect)
 
-    world.pool.sellGoodGuy(soldGuy.entityId)
-    world.addBones(soldGuy.bones)
+    world.pool.sellGoodGuy(soldGoodGuy.entityId)
+    world.addBones(soldGoodGuy.bones)
     world.numSelected -= 1
 
 def handleDeselectButton(world):
@@ -176,8 +145,8 @@ def handleClick(world, event):
     else:  # If no selected then check if mouse click on entity or hud buttons
         if clickedGuy := mouseInSelectedStats(world.pool, event.pos):
             handleStatClick(clickedGuy, event.pos)
-        elif soldGuy := mouseInSell(world.pool, event.pos):
-            handleSell(world, soldGuy)
+        elif soldGoodGuy := mouseInSell(world.pool, event.pos):
+            handleSell(world, soldGoodGuy)
         # If in hud buttons then see which hud button was clicked
         elif clickedButton := mouseInHudButtons(world.hud, event.pos):
                 if clickedButton.buttonFunction == "buy": # Prepare to buy a guy

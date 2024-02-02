@@ -17,10 +17,10 @@ class BadGuy(Entity):
         self.isAlive = True
 
     def getSelectedStats(self):
-        return self.getBaseStats() + [self.getBadGuyType(),
-                                     self.getHp(),
-                                     self.getSpawnTime(),
-                                     self.getIsAlive()]
+        return self.getBaseStatsList() + [self.getBadGuyType(),
+                                          self.getHp(),
+                                          self.getSpawnTime(),
+                                          self.getIsAlive()]
 
     def switchCanSpawn(self):
         self.canSpawn = not self.canSpawn
@@ -66,7 +66,7 @@ class BadGuy(Entity):
             self.setThree()
 
     def setOne(self):
-        self.setBadGuyStats([59, 255, 103], 255, 50) # Green
+        self.setBadGuyStats([59, 255, 103], 300, 50) # Green
 
     def setTwo(self):
         self.setBadGuyStats([59, 103, 255], 255, 10) # Blue

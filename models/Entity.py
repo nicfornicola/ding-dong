@@ -16,7 +16,7 @@ class Entity:
         self.infoBlock = InfoBlock(None, None)
         self.bones = 5
 
-    def getBaseStats(self):
+    def getBaseStatsList(self):
         return [self.getEntityId(), self.getRect(), self.getCoolDown(), self.getBones()]
 
     def setSellBlock(self, sellBlock):

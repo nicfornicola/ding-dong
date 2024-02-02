@@ -33,8 +33,9 @@ goodGuy:
         tesla coil - hits aoe
         extra damage
     ✅ add getting money back when sold
-    animation to move guy back to wallet when sold
+    ✅ animation to move guy back to wallet when sold
     ✅ total damage stat
+    ✅ add costs to object
 
 badGuy:
     sprites
@@ -47,7 +48,9 @@ badGuy:
         heals others
         speeds others (around it or maybe target)
         minus damage
-    add number of bad Guys next to circles
+    ✅ add number of bad Guys next to circles
+    add badGuy world damage
+    when bad guy gets through flash red light or somthing
 
 items:
     sprites
@@ -55,7 +58,12 @@ items:
     items UI,
     what possible items can be dropped and their percents, similar to tf2 crates
 
+playable guy feature:
+    add playable guy
+    add enemy shooting
+
 bugs:
+    spawn difference bug when changeing levels
     ✅ guy places off the mouse wrong
     ✅ can place goodGuys in hud
     stats flips when go to the right on badguys
