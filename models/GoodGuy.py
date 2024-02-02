@@ -144,11 +144,11 @@ class GoodGuy(Entity):
 
         match self.targetingMethod:
             case "First":
-                self.currentTarget = self.findFirstTarget(self.inRangeList)
+                self.currentTarget = findFirstTarget(self.inRangeList)
             case "Last":
-                self.currentTarget = self.findLastTarget(self.inRangeList)
+                self.currentTarget = findLastTarget(self.inRangeList)
             case "Strongest":
-                self.currentTarget = self.findStrongestTarget(self.inRangeList)
+                self.currentTarget = findStrongestTarget(self.inRangeList)
             case "Closest":
                 self.currentTarget = self.findClosestTarget(self.inRangeList)
             case _:
@@ -191,36 +191,35 @@ class GoodGuy(Entity):
 
 ##################### Static functions ###############################
 
-    def findFirstTarget(self, inRangeList: list[BadGuy]) -> BadGuy | None:
-        self.count +=1
-        newTarget = None
-        for badGuy in inRangeList:
-            # Set newTarget for baseline or if badGuy is further than newTarget, make badGuy the newTarget
-            if newTarget is None or badGuy.currentIndex > newTarget.currentIndex:
-                newTarget = badGuy
-
-        return newTarget
-
-    def findLastTarget(self, inRangeList: list[BadGuy]) -> BadGuy | None:
-        self.count +=1
-
-        newTarget = None
-        for badGuy in inRangeList:
-            # Set newTarget for baseline or if badGuy is closer than newTarget, make badGuy the newTarget
-            if newTarget is None or badGuy.currentIndex < newTarget.currentIndex:
-                newTarget = badGuy
-
-        return newTarget
-
-    def findStrongestTarget(self, inRangeList: list[BadGuy]) -> BadGuy | None:
-        self.count +=1
-
-        newTarget = None
-        for badGuy in inRangeList:
-            # Set newTarget for baseline or if badGuy is stronger than newTarget, make badGuy the newTarget
-            if newTarget is None or badGuy.hp > newTarget.hp:
-                newTarget = badGuy
-
-        return newTarget
 
 
+def findFirstTarget(inRangeList: list[BadGuy]) -> BadGuy | None:
+    newTarget = None
+    for badGuy in inRangeList:
+        # Set newTarget for baseline or if badGuy is further than newTarget, make badGuy the newTarget
+        if newTarget is None or badGuy.currentIndex > newTarget.currentIndex:
+            newTarget = badGuy
+
+    return newTarget
+
+
+def findLastTarget(inRangeList: list[BadGuy]) -> BadGuy | None:
+
+    newTarget = None
+    for badGuy in inRangeList:
+        # Set newTarget for baseline or if badGuy is closer than newTarget, make badGuy the newTarget
+        if newTarget is None or badGuy.currentIndex < newTarget.currentIndex:
+            newTarget = badGuy
+
+    return newTarget
+
+
+def findStrongestTarget(inRangeList: list[BadGuy]) -> BadGuy | None:
+
+    newTarget = None
+    for badGuy in inRangeList:
+        # Set newTarget for baseline or if badGuy is stronger than newTarget, make badGuy the newTarget
+        if newTarget is None or badGuy.hp > newTarget.hp:
+            newTarget = badGuy
+
+    return newTarget
