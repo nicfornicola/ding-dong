@@ -34,13 +34,14 @@ def findNewPos(pixels,x,y,traveled):
     return newPos
 
 # x and y are point to find if in circle
-def isInside(pointX, pointY, guy):
+def isInside(point, guy, r=None):
     # (x - center_x)² + (y - center_y)² < radius²
-    if guy.entityType == "bad":
-        r = guy.rect.width/2
-    else:
-        r = guy.rangeRad
-    return pow(pointX - guy.rect.centerx, 2) + pow(pointY - guy.rect.centery, 2) < pow(r ,2)
+    if r is None:
+        if guy.entityType == "bad":
+            r = guy.rect.width/2
+        else:
+            r = guy.rangeRad
+    return pow(point[0] - guy.rect.centerx, 2) + pow(point[1] - guy.rect.centery, 2) < pow(r, 2)
 
 def dis(guy1, guy2):
     return math.dist([guy1.rect.x, guy1.rect.y], [guy2.rect.x, guy2.rect.y])
@@ -74,7 +75,7 @@ def handleEntitySelect(world, pos):
     for guy in world.pool.getGuyLists():
         # Use different clicks since goodGuys are squares and badGuys are circles
         if (guy.entityType == "good" and guy.rect.collidepoint(pos))\
-           or (guy.entityType == "bad" and isInside(pos[0], pos[1], guy)):
+           or (guy.entityType == "bad" and isInside(pos, guy)):
             clicked = True
             guy.isSelected = not guy.isSelected
 

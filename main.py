@@ -75,15 +75,25 @@ def drawGoodGuys(pool: Pool):
 def actionGoodGuys():
     for g in world.pool.goodGuyList:
         if g.canDoAction():
-            if g.shootTarget(world):
-                pygame.draw.line(screen, g.color, g.rect.center, g.currentTarget.rect.center, g.damage)
             g.findTarget(world.pool)
+            if guysHits := g.shootTarget(world):
+                p1 = g.rect.center
+                for guy in guysHits:
+                    p2 = guy.rect.center
+                    pygame.draw.line(screen, "black", p1, p2, g.damage)
+                    p1 = guy.rect.center
 
 def drawBadGuys(pool: Pool):
     for b in pool.badGuyList:
         pygame.draw.circle(screen, b.color, (b.rect.centerx, b.rect.centery), b.rect.width/2)
         pygame.draw.circle(screen, "black", (b.rect.centerx, b.rect.centery), b.rect.width/2, width=2)
 
+def aliveCheck(badGuy):
+    if badGuy.hp <= 0:
+        badGuy.isAlive = False
+        badGuy.color = "red"
+        world.pool.updateAllDead()
+        world.addBones(badGuy.bones)
 
 def actionBadGuys(path: list[Rect]):
     for badGuy in world.pool.badGuyList:
@@ -93,6 +103,8 @@ def actionBadGuys(path: list[Rect]):
                 badGuy.switchCanSpawn()
 
         if badGuy.isAlive and badGuy.canSpawn and badGuy.canDoAction():
+            aliveCheck(badGuy)
+
             # if badGuy makes it to the end of the path
             if len(path) == badGuy.currentIndex + 1:
                 world.globalHp -= 1 # take n hp off of globalHp
@@ -106,12 +118,6 @@ def actionBadGuys(path: list[Rect]):
             badGuy.rect.center = (path[pathIndex].x, path[pathIndex].y)
             badGuy.lastAction = pygame.time.get_ticks() # record this action
 
-            # for goodGuy in world.pool.goodGuyList:
-            #     inRange = goodGuy.inRange(badGuy)
-            #     if badGuy in goodGuy.inRangeList and not inRange:
-            #         goodGuy.inRangeList.remove(badGuy)
-            #     elif badGuy not in goodGuy.inRangeList and inRange:
-            #         goodGuy.inRangeList.append(badGuy)
 
 def findSelectedGuyStatsPosition(guy, maxWidth):
     # Default values for when the stat block is inWindow
@@ -420,18 +426,6 @@ def drawSoldGuy(sGuy):
             # If landing check last n frames to shrink shadow
             sGuy.shadow.inflate_ip(-1, -1)
 
-    # guyXY = (0,0)
-    # shadowXY = (0,0)
-    # if inBot(y) and inLeft(x):  # bottom left
-    #     guyXY = (x + h, y - h)
-    #     shadowXY = (x - h, y + h)
-    # if not inBot(y) and inLeft(x): # top left
-    #     guyXY = (x + h, y + h)
-    #     shadowXY = (x - h, y - h)
-    # if not inBot(y) and not inLeft(x): # top right
-    #     guyXY = (x - h, y + h)
-    #     shadowXY = (x + h, y - h)
-    # if inBot(y) and not inLeft(x): # bot right
     guyXY = (x - sGuy.shadowHeight, y - sGuy.shadowHeight)
     shadowXY = (x + sGuy.shadowHeight, y + sGuy.shadowHeight)
 
@@ -458,6 +452,11 @@ def drawAllGuys():
     drawBadGuys(world.pool)
     drawGoodGuys(world.pool)
 
+def drawLevelWon():
+    if world.wonLevel:
+        drawBlock((WIDTH/2 - 50, HEIGHT/2), ["Winna Winna!"])
+
+
 def drawHud():
     drawBuyBlocks()
     drawWorldStats()
@@ -472,6 +471,8 @@ def drawHud():
     for guy in world.pool.getGuyLists():
         if guy.isSelected:
             drawSelectedGuyStats(guy)
+
+    drawLevelWon()
 
 def drawEverything():
     drawAllGuys()
@@ -510,9 +511,6 @@ while running:
         actionGoodGuys()
 
     world.checkLevelStatus()
-
     pygame.display.flip()
-
-
 
 pygame.quit()

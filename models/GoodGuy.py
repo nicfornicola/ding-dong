@@ -4,7 +4,6 @@ from models.BadGuy import BadGuy
 from models.Entity import Entity
 from util.Util import isInside, dis
 
-
 class GoodGuy(Entity):
     def __init__(self, towerType, entityId=-1, color=None, rect=None, rangeRad=None, coolDown=None, damage=None, targetingMethod=None, fullCopy=True):
         super().__init__(entityId, "good", rect, coolDown)
@@ -90,7 +89,7 @@ class GoodGuy(Entity):
             elif self.towerType == "purple":
                 return self.setGoodGuyStats("purple", damage=15, bones=8, rangeRad=300, coolDown=1000)
             elif self.towerType == "yellow":
-                return self.setGoodGuyStats("yellow", damage=15, bones=8, rangeRad=300, coolDown=1000)
+                return self.setGoodGuyStats("yellow", damage=1, bones=15, rangeRad=150, coolDown=700)
             elif self.towerType == "black":
                 return self.setGoodGuyStats("black", damage=15, bones=8, rangeRad=300, coolDown=1000)
             elif self.towerType == "orange":
@@ -104,7 +103,6 @@ class GoodGuy(Entity):
         return GoodGuy(self.towerType, entityId=entityID)
 
 
-
     # Go through the loop of methods
     def handleTargetingMethodChange(self):
         self.switchedMethod = True
@@ -113,7 +111,6 @@ class GoodGuy(Entity):
                                self.targetingMethods[index + 1]
 
     def findClosestTarget(self, inRangeList: list[BadGuy]) -> BadGuy | None:
-        self.count += 1
         newTarget = None
         for badGuy in inRangeList:
             if newTarget is None or dis(badGuy, self) < dis(newTarget, self):
@@ -122,7 +119,7 @@ class GoodGuy(Entity):
         return newTarget
 
     def inRange(self, badGuy):
-        return isInside(badGuy.rect.centerx, badGuy.rect.centery, self)
+        return isInside(badGuy.rect.center, self)
 
     def updateInRangeList(self, badGuyList):
         for badGuy in badGuyList:
@@ -153,22 +150,39 @@ class GoodGuy(Entity):
                 self.currentTarget = self.findClosestTarget(self.inRangeList)
             case _:
                 print("bad targetingMethod")
-        # print(self.count)
 
-    def shootTarget(self, world) -> bool:
+    def dealDamage(self, currentTarget):
+        currentTarget.hp -= self.damage
+        self.totalDamageDone += self.damage
+
+    def damageNextClosest(self, currentTarget, bounces, badGuyList, alreadyHitList):
+        # If run out of bounces or if no more targets then return
+        if bounces == 0 or currentTarget is None:
+            return []
+        else:
+            # Do damage to the next guy
+            self.dealDamage(currentTarget)
+            # Add currentTarget to list so we don't hit again
+            alreadyHitList.append(currentTarget)
+            # Find nextTarget to send to the slammer
+            nextTarget = findClosestLightningTarget(badGuyList, alreadyHitList)
+            # Call next iteration with one less bounce
+            return [currentTarget] + self.damageNextClosest(nextTarget, bounces-1, badGuyList, alreadyHitList)
+
+    def lightingTargets(self, world):
+        return self.damageNextClosest(self.currentTarget, 5, world.pool.badGuyList, [])
+
+
+    def shootTarget(self, world):
         # If we have a current target then shoot else do nothing
         if self.currentTarget:
-            self.currentTarget.hp -= self.damage
-            self.totalDamageDone += self.damage
-
-            if self.currentTarget.hp <= 0:
-                self.currentTarget.isAlive = False
-                self.currentTarget.color = "red"
-                world.pool.updateAllDead()
-                world.addBones(self.currentTarget.bones)
-
             self.lastAction = pygame.time.get_ticks()
-            return True
+
+            if self.towerType == "yellow":
+                return self.lightingTargets(world)
+            else:
+                return [self.dealDamage(self.currentTarget)]
+
         else:
             return False
 
@@ -223,3 +237,23 @@ def findStrongestTarget(inRangeList: list[BadGuy]) -> BadGuy | None:
             newTarget = badGuy
 
     return newTarget
+
+def findClosestLightningTarget(badGuyList, alreadyHitList) -> BadGuy | None:
+    lastHitGuy = alreadyHitList[-1]
+    newTarget = None
+    # Go through the list and find the next badGuy that hasn't been hit and is not dead or the lastHitGuy
+    for badGuy in badGuyList:
+        if badGuy.isAlive and badGuy is not newTarget and isInside(badGuy.rect.center, lastHitGuy, 30) and badGuy not in alreadyHitList:
+            # Do this only on the first qualified guy to set a baseline
+            if newTarget is None:
+                newTarget = badGuy
+                continue
+
+            if dis(badGuy, lastHitGuy) < dis(newTarget, lastHitGuy):
+                newTarget = badGuy
+
+    if newTarget is lastHitGuy:
+        return None
+
+    return newTarget
+

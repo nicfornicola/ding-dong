@@ -60,7 +60,6 @@ class World:
         self.playButtonImg = pygame.image.load("img/playButton.png").convert()
         self.pauseButtonImg = pygame.image.load("img/pauseButton.png").convert()
         self.deselectImg = pygame.transform.scale(pygame.image.load("img/deselectButton.png").convert(), (20, 20))
-        self.level = 1
         self.pool = Pool("guys")
         self.timePlayed = 0
         self.timePaused = 0
@@ -71,6 +70,8 @@ class World:
         self.buyButtonGreyImgList = []
         self.deselectButton = self.setDeselectButton()
         self.currentWave = 1
+        self.finalWave = 2
+        self.wonLevel = False
         self.endLevel = False
         self.testMode = False
         self.setButtonImgs()
@@ -143,10 +144,22 @@ class World:
     def setTimePaused(self):
         self.timePaused = pygame.time.get_ticks()/1000 - self.timePlayed
 
+    def checkWonLevel(self):
+        if self.endLevel and self.currentWave == self.finalWave:
+            print("you won")
+            self.wonLevel = True
+            return True
+        else:
+            return False
+
+
     def checkLevelStatus(self):
         if self.pool.numOfBadGuysThrough == len(self.pool.badGuyList) or not self.pool.anyAlive:
             self.endLevel = True
             self.currentMode = "pause"
-            self.currentWave += 1
             self.pool.anyAlive = True
-            self.pool.setWavePools(self.currentWave)
+
+            if not self.checkWonLevel():
+                self.currentWave += 1
+                self.pool.setWavePools(self.currentWave)
+

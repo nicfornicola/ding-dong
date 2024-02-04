@@ -66,13 +66,13 @@ class BadGuy(Entity):
             self.setThree()
 
     def setOne(self):
-        self.setBadGuyStats([59, 255, 103], 300, 50) # Green
+        self.setBadGuyStats([59, 255, 103], 10, 50) # Green
 
     def setTwo(self):
-        self.setBadGuyStats([59, 103, 255], 255, 10) # Blue
+        self.setBadGuyStats([59, 103, 255], 50, 10) # Blue
 
     def setThree(self):
-        self.setBadGuyStats([255, 59, 241], 255, 70) # Pink
+        self.setBadGuyStats([255, 59, 241], 1000, 70) # Pink
 
     def __str__(self) -> str:
         return "entityId=" + str(self.entityId) +\

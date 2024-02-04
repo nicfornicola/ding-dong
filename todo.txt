@@ -51,6 +51,7 @@ badGuy:
     ✅ add number of bad Guys next to circles
     add badGuy world damage
     when bad guy gets through flash red light or somthing
+    add something to handle when bad Guys finish the race
 
 items:
     sprites
@@ -63,6 +64,7 @@ playable guy feature:
     add enemy shooting
 
 bugs:
+    when selected a badgguy and a goodguy when the badguy dies make sure it is unselected
     spawn difference bug when changeing levels
     ✅ guy places off the mouse wrong
     ✅ can place goodGuys in hud
